@@ -26,7 +26,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Start MariaDB
+      - name: Empezar MariaDB
         uses: getong/mariadb-action@v1.1
         with:
           host port: 3800 # Optional, default value is 3306. The port of host
@@ -34,8 +34,20 @@ jobs:
           character set server: 'utf8' # Optional, default value is 'utf8mb4'. The '--character-set-server' option for mysqld
           collation server: 'utf8_general_ci' # Optional, default value is 'utf8mb4_general_ci'. The '--collation-server' option for mysqld
           mariadb version: '10.4.10' # Optional, default value is "latest". The version of the MariaDB
-          mysql database: 'some_test' # Optional, default value is "test". The specified database which will be create
+          mysql database: 'sistemaweb' # Optional, default value is "test". The specified database which will be create
           mysql root password: ${{ secrets.pass }} # Required if "mysql user" is empty, default is empty. The root superuser password
+      - name: Instalar MySQL
+        run: sudo apt-get install mysql-client
+      - name: Configurar MariaDB
+        run: |
+          mysql -h localhost -P 3800 -u root -p ${{ secrets.pass }} -D sistemaweb -e "CREATE TABLE `login` (email TINYTEXT NULL, usuario TINYTEXT NULL)"
+          echo "${{ secrets.usuarios }}" | tail -n +2 | while IFS=';' read -r email usuario; do
+              # Construct the INSERT INTO statement
+              query="INSERT INTO sistemaweb (email, usuario) VALUES ('$email', '$usuario');"
+
+              # Execute the INSERT INTO statement using mysql command
+              echo "$query" | mysql -h localhost -u root -p ${{ secrets.pass }} sistemaweb
+          done
       - name: Checkout
         uses: actions/checkout@v3
       - name: Setup Pages
