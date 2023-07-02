@@ -36,17 +36,19 @@ jobs:
           mariadb version: '10.4.10' # Optional, default value is "latest". The version of the MariaDB
           mysql database: 'sistemaweb' # Optional, default value is "test". The specified database which will be create
           mysql root password: ${{ secrets.pass }} # Required if "mysql user" is empty, default is empty. The root superuser password
+          mysql user: 'developer' # Required if "mysql root password" is empty, default is empty. The superuser for the specified database. Can use secrets, too
+          mysql password: ${{ secrets.pass }} # Required if "mysql user" exists. The password for the "mysql user"
       - name: Instalar MySQL
         run: sudo apt-get install mysql-client
       - name: Configurar MariaDB
         run: |
-          mysql -h localhost -P 3800 -u root -p ${{ secrets.pass }} -D sistemaweb -e "CREATE TABLE `login` (email TINYTEXT NULL, usuario TINYTEXT NULL)"
+          mysql -h localhost -P 3800 -u developer -p ${{ secrets.pass }} -D sistemaweb -e "CREATE TABLE `login` (email TINYTEXT NULL, usuario TINYTEXT NULL)"
           echo "${{ secrets.usuarios }}" | tail -n +2 | while IFS=';' read -r email usuario; do
               # Construct the INSERT INTO statement
               query="INSERT INTO sistemaweb (email, usuario) VALUES ('$email', '$usuario');"
 
               # Execute the INSERT INTO statement using mysql command
-              echo "$query" | mysql -h localhost -u root -p ${{ secrets.pass }} sistemaweb
+              echo "$query" | mysql -h localhost -u developer -p ${{ secrets.pass }} -P 3800 sistemaweb
           done
       - name: Checkout
         uses: actions/checkout@v3
