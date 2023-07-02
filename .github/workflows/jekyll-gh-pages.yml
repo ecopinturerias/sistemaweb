@@ -40,13 +40,13 @@ jobs:
         run: sudo apt-get install mysql-client
       - name: Configurar MariaDB
         run: |
-          sudo mysql -h localhost -P 3800 -u root -p ${{ secrets.pass }} -D sistemaweb -e "CREATE TABLE `login` (email TINYTEXT NULL, usuario TINYTEXT NULL)"
+          mysql -h localhost -P 3800 -u root --password=${{ secrets.pass }} -D sistemaweb -e "CREATE TABLE `login` (email TINYTEXT NULL, usuario TINYTEXT NULL)"
           echo "${{ secrets.usuarios }}" | tail -n +2 | while IFS=';' read -r email usuario; do
               # Construct the INSERT INTO statement
               query="INSERT INTO `sistemaweb`.`login` (`email`, `usuario`) VALUES ('$email', '$usuario');"
 
               # Execute the INSERT INTO statement using mysql command
-              sudo mysql -h localhost -u root -P 3800 sistemaweb -e "$query"
+              mysql -h localhost -u root -P 3800 --password=${{ secrets.pass }} -D sistemaweb -e "$query"
           done
       - name: Checkout
         uses: actions/checkout@v3
